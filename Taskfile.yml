@@ -3,11 +3,18 @@
 version: '3'
 
 vars:
-  GREETING: Hello, world!
+  IMAGE_NAME: resource-manager-front
+  CONTAINER_NAME: resource-manager-front
 
 tasks:
-  default:
-    desc: Print a greeting message
+  dev:
+    desc: "Run the development environment"
     cmds:
-      - echo "{{.GREETING}}"
-    silent: true
+      - docker build -f Dockerfile -t {{.IMAGE_NAME}}-dev .
+      - >
+        docker run -it --rm 
+        --name {{.CONTAINER_NAME}}-dev 
+        -p 5173:5173 
+        -v {{.PWD}}:/app 
+        -v /app/node_modules 
+        {{.IMAGE_NAME}}-dev

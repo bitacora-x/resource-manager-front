@@ -7,7 +7,7 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate', // Actualiza el Service Worker automáticamente sin recargar
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['*'],
       manifest: {
         name: 'Mi Aplicación Increíble',
         short_name: 'MiPWA',
