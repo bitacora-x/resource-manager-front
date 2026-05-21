@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+echo "⏳ Iniciando el proceso de commit..."ç
+
+echo "👉 Paso 1: Ejecutando el linter para revisar el código..."
+pnpm eslint ./src/
+
+echo "✅ Todo correcto. ¡Commit finalizado con éxito!"
