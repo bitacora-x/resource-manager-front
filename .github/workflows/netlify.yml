@@ -28,6 +28,12 @@ jobs:
       - name: Editorconfig Linter
         uses: editorconfig-checker/action-editorconfig-checker@main
 
+      - name: Prettier
+        run: pnpm run format:check
+
+      - name: Lint & typecheck
+        run: pnpm run lint
+
   codeql:
     name: CodeQL
     runs-on: ubuntu-latest
