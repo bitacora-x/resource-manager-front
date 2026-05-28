@@ -7,6 +7,27 @@ on:
   push:
     branches: [master]
 jobs:
+  lint:
+    name: Editorconfig, Prettier, Lint & typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: pnpm install
+        run: pnpm install
+
+      - name: Editorconfig Linter
+        uses: editorconfig-checker/action-editorconfig-checker@main
+
   build:
     runs-on: ubuntu-22.04
     steps:
@@ -14,12 +35,11 @@ jobs:
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: 11
 
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
-          registry-url: "https://registry.npmjs.org"
 
       - name: pnpm install
         run: pnpm install
@@ -30,7 +50,7 @@ jobs:
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3.0
         with:
-          publish-dir: './dist'
+          publish-dir: "./dist"
           production-branch: master
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: "Deploy from GitHub Actions into Netlifly"

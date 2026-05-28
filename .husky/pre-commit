@@ -42,7 +42,7 @@ run_frontend_checks() {
   ensure_node
 
   echo "Run lint 🧹"
-  #npx lint-staged || return 1
+  pnpm run lint-staged || return 1
 
   echo "Run test ✅"
   #pnpm test:ci || return 1
