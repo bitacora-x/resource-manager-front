@@ -34,6 +34,18 @@ jobs:
       - name: Lint & typecheck
         run: pnpm run lint
 
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: actionlint
+        uses: reviewdog/action-actionlint@v1
+        with:
+          reporter: github-check
+          fail_level: warning
+
   codeql:
     name: CodeQL
     runs-on: ubuntu-latest
@@ -57,7 +69,7 @@ jobs:
 
   build:
     runs-on: ubuntu-22.04
-    needs: [lint, codeql]
+    needs: [lint, codeql, actionlint]
     steps:
       - uses: actions/checkout@v6
 
