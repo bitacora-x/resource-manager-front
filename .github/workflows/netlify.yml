@@ -48,16 +48,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 11
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-
-      - name: pnpm install
-        run: pnpm install
+      - name: Setup environment
+        uses: ./.github/actions/setup-node-env
 
       - name: run tests
         run: pnpm test
@@ -68,16 +60,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 11
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-
-      - name: pnpm install
-        run: pnpm install
+      - name: Setup environment
+        uses: ./.github/actions/setup-node-env
 
       - name: pnpm build
         run: pnpm build
