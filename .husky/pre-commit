@@ -45,7 +45,7 @@ run_frontend_checks() {
   pnpm run lint-staged || return 1
 
   echo "Run test ✅"
-  #pnpm test:ci || return 1
+  pnpm vitest --run || return 1
 
   echo "✅ Code is clean and tests passed! Ready to commit 🚀"
 }
