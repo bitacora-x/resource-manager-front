@@ -1,0 +1,26 @@
+{
+  "ref": "refs/heads/master",
+  "before": "0000000000000000000000000000000000000000",
+  "after": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "repository": {
+    "owner": {
+      "name": "local-dev"
+    },
+    "name": "resource-manager-front",
+    "default_branch": "master"
+  },
+  "pusher": {
+    "name": "local-dev",
+    "email": "dev@localhost"
+  },
+  "commits": [
+    {
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "message": "local test push",
+      "timestamp": "2025-01-01T00:00:00Z",
+      "added": [],
+      "removed": [],
+      "modified": ["src/App.vue"]
+    }
+  ]
+}

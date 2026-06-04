@@ -1,2 +1,8 @@
 .husky/pre-commit
 .prettierignore
+.pnpm-store/
+
+# Files without extensions — Prettier cannot infer a parser
+.actrc
+.secrets.example
+.env.act.example

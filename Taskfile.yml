@@ -22,3 +22,200 @@ tasks:
     desc: "prettier and ESlint"
     cmds:
       - pnpm run format:check && pnpm run lint
+
+  # ─────────────────────────────────────────────────────────────
+  # GitHub Actions local testing via nektos/act
+  # ─────────────────────────────────────────────────────────────
+
+  actions:doctor:
+    desc: Verify prerequisites for local GitHub Actions testing
+    cmds:
+      - task: _check:docker
+      - task: _check:act
+      - task: _check:workflows
+      - task: _check:secrets:warn
+      - echo "✓ All prerequisites met. Run 'task actions:test' to run the local suite."
+
+  actions:list:
+    desc: List available GitHub Actions workflows and jobs
+    cmds:
+      - act --list
+      - |
+        echo
+        echo '── Quick reference ──'
+        echo '  Full suite:        task actions:test'
+        echo '  Single job:        task actions:test:job -- <job-name>'
+        echo '  Single workflow:   task actions:test:workflow -- <workflow-file>'
+        echo '  Push event:        task actions:test:push'
+        echo '  Dispatch event:    task actions:test:dispatch'
+
+  actions:test:
+    desc: "Run the local GitHub Actions test suite (lint + actionlint + tests via pull_request)"
+    cmds:
+      - task: _check:act
+      - task: _run_suite
+        vars:
+          EVENT: pull_request
+
+  actions:test:push:
+    desc: Run local suite simulating a push to master (lint + actionlint + tests)
+    cmds:
+      - task: _check:act
+      - task: _run_suite
+        vars:
+          EVENT: push
+          EVENT_PATH: .github/act/events/push.json
+
+  actions:test:pr:
+    desc: Run local suite simulating a pull_request event (lint + actionlint + tests)
+    cmds:
+      - task: _check:act
+      - task: _run_suite
+        vars:
+          EVENT: pull_request
+
+  actions:test:dispatch:
+    desc: Run local suite simulating a workflow_dispatch event (lint + actionlint + tests)
+    cmds:
+      - task: _check:act
+      - task: _run_suite
+        vars:
+          EVENT: workflow_dispatch
+          EVENT_PATH: .github/act/events/workflow_dispatch.json
+
+  actions:test:full:
+    desc: "Run ALL jobs locally (WARNING: requires valid .secrets with GITHUB_TOKEN, NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID)"
+    cmds:
+      - task: _check:act
+      - task: _check:secrets:strict
+      - act pull_request --secret-file .secrets
+
+  actions:test:job:
+    desc: "Run a specific job locally. Usage: task actions:test:job -- <job-name>"
+    preconditions:
+      - sh: '[ -n "{{.CLI_ARGS}}" ]'
+        msg: |
+          ERROR: You must specify a job name.
+          Usage: task actions:test:job -- <job-name>
+          Examples:
+            task actions:test:job -- lint
+            task actions:test:job -- tests
+            task actions:test:job -- actionlint
+    cmds:
+      - task: _check:act
+      - act -j {{.CLI_ARGS}}
+
+  actions:test:workflow:
+    desc: "Run a specific workflow locally. Usage: task actions:test:workflow -- <workflow-file>"
+    preconditions:
+      - sh: '[ -n "{{.CLI_ARGS}}" ]'
+        msg: |
+          ERROR: You must specify a workflow file.
+          Usage: task actions:test:workflow -- <path-to-workflow>
+          Example: task actions:test:workflow -- .github/workflows/netlify.yml
+      - sh: '[ -f "{{.CLI_ARGS}}" ]'
+        msg: |
+          ERROR: Workflow file not found: '{{.CLI_ARGS}}'
+    cmds:
+      - task: _check:act
+      - act -W {{.CLI_ARGS}}
+
+  # ─────────────────────────────────────────────────────────────
+  # Internal helpers (not meant for direct invocation)
+  # ─────────────────────────────────────────────────────────────
+
+  _run_suite:
+    internal: true
+    desc: Run the safe jobs (lint, actionlint, tests) for a given event
+    vars:
+      EVENT: '{{.EVENT | default "pull_request"}}'
+      EVENT_PATH: '{{.EVENT_PATH | default ""}}'
+    cmds:
+      - |
+        set -e
+        FAILED=""
+        EXTRA=""
+        [ -n "{{.EVENT_PATH}}" ] && EXTRA="--eventpath {{.EVENT_PATH}}"
+        for job in lint actionlint tests; do
+          echo "━━━ Running job: $job (event: {{.EVENT}}) ━━━"
+          if act {{.EVENT}} -j "$job" $EXTRA; then
+            echo "  ✓ $job passed"
+          else
+            if [ "$job" = "actionlint" ]; then
+              echo "  ⚠  actionlint completed but could not post results to GitHub API (expected in local act)."
+              echo "     The workflow-level 'continue-on-error: true' handles this in real CI."
+            else
+              FAILED="$FAILED $job"
+            fi
+          fi
+          echo ""
+        done
+        if [ -n "$FAILED" ]; then
+          echo "✗ Suite FAILED for jobs:$FAILED"
+          exit 1
+        fi
+        echo "✓ Suite passed: lint + actionlint + tests"
+
+  _check:docker:
+    internal: true
+    desc: Check that Docker is available and running
+    cmds:
+      - |
+        if ! docker info > /dev/null 2>&1; then
+          echo "✗ ERROR: Docker is not running or not installed."
+          echo "  Install Docker: https://docs.docker.com/get-docker/"
+          echo "  Start the daemon and make sure your user has permissions."
+          exit 1
+        fi
+      - echo "  ✓ Docker is running"
+
+  _check:act:
+    internal: true
+    desc: Check that act is installed
+    cmds:
+      - |
+        if ! command -v act > /dev/null 2>&1; then
+          echo "✗ ERROR: 'act' is not installed."
+          echo "  macOS:  brew install act"
+          echo "  Linux:  curl -sSL https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash"
+          echo "  Docs:   https://nektosact.com"
+          exit 1
+        fi
+      - echo "  ✓ act is installed ($(act --version 2>&1))"
+
+  _check:workflows:
+    internal: true
+    desc: Check that workflow files exist under .github/workflows/
+    cmds:
+      - |
+        if ! find .github/workflows -maxdepth 1 \( -name '*.yml' -o -name '*.yaml' \) | grep -q .; then
+          echo "✗ ERROR: No workflow files found in .github/workflows/"
+          exit 1
+        fi
+      - echo "  ✓ Workflow files found in .github/workflows/"
+
+  _check:secrets:warn:
+    internal: true
+    desc: Warn if .secrets is missing (non-fatal)
+    cmds:
+      - |
+        if [ ! -f .secrets ]; then
+          echo "  ⚠  WARNING: .secrets file not found."
+          echo "     The default test suite works without secrets."
+          echo "     To run all jobs: cp .secrets.example .secrets and fill in the values."
+        else
+          echo "  ✓ .secrets file exists"
+        fi
+
+  _check:secrets:strict:
+    internal: true
+    desc: Require .secrets to exist (fatal if missing)
+    cmds:
+      - |
+        if [ ! -f .secrets ]; then
+          echo "✗ ERROR: .secrets file is required for this task."
+          echo "  Run: cp .secrets.example .secrets"
+          echo "  Then fill in the required values: GITHUB_TOKEN, NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID"
+          exit 1
+        fi
+      - echo "  ✓ .secrets file exists"

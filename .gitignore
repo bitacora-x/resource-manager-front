@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# act — local GitHub Actions testing
+.secrets
+.env.act

@@ -1,0 +1,13 @@
+{
+  "action": "workflow_dispatch",
+  "inputs": {},
+  "ref": "refs/heads/master",
+  "repository": {
+    "owner": {
+      "name": "local-dev"
+    },
+    "name": "resource-manager-front",
+    "default_branch": "master"
+  },
+  "workflow": ".github/workflows/netlify.yml"
+}

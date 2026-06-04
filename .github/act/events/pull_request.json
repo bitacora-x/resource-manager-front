@@ -1,0 +1,24 @@
+{
+  "action": "opened",
+  "number": 1,
+  "pull_request": {
+    "number": 1,
+    "title": "feat: local test PR",
+    "body": "Testing locally with act.",
+    "base": {
+      "ref": "master",
+      "sha": "0000000000000000000000000000000000000000"
+    },
+    "head": {
+      "ref": "feature/test-branch",
+      "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "repository": {
+    "owner": {
+      "name": "local-dev"
+    },
+    "name": "resource-manager-front",
+    "default_branch": "master"
+  }
+}
