@@ -18,3 +18,7 @@ tasks:
         -v {{.PWD}}:/app 
         -v /app/node_modules 
         {{.IMAGE_NAME}}-dev
+  clean:
+    desc: "prettier and ESlint"
+    cmds:
+      - pnpm run format:check && pnpm run lint

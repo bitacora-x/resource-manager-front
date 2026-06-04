@@ -67,9 +67,31 @@ jobs:
         with:
           category: "/language:javascript-typescript"
 
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: pnpm install
+        run: pnpm install
+
+      - name: run tests
+        run: pnpm test
+
   build:
     runs-on: ubuntu-22.04
-    needs: [lint, codeql, actionlint]
+    needs: [lint, codeql, actionlint, tests]
     steps:
       - uses: actions/checkout@v6
 
