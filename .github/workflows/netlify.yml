@@ -31,12 +31,12 @@ jobs:
         run: pnpm run lint
 
   actionlint:
-    name: actionlint
+    name: Action lint
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: actionlint
+      - name: Action lint
         uses: reviewdog/action-actionlint@v1
         with:
           reporter: github-check
@@ -55,6 +55,7 @@ jobs:
         run: pnpm test
   push_to_registry:
     name: Push Docker image to GitHub Packages
+    needs: [lint, actionlint, tests]
     runs-on: ubuntu-latest
     permissions:
       contents: read
