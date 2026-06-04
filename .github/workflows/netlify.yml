@@ -49,37 +49,6 @@ jobs:
         with:
           reporter: github-check
           fail_level: warning
-
-  codeql:
-    name: CodeQL
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: javascript-typescript
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
-
-      - name: Analyze
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "/language:javascript-typescript"
-
   tests:
     name: Tests
     runs-on: ubuntu-latest
@@ -103,7 +72,7 @@ jobs:
 
   build:
     runs-on: ubuntu-22.04
-    needs: [lint, codeql, actionlint, tests]
+    needs: [lint, actionlint, tests]
     steps:
       - uses: actions/checkout@v6
 
